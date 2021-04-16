@@ -1,4 +1,56 @@
-#include "tokenizer.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+
+#define MAX_LINE 80 /* The maximum length command */
+void tokenize(char* cbuf, char* args[]);
+void tokenizeFull(char* command, char* args[]);
+
+// tokenizes an individual command
+void tokenize(char* cbuf, char* args[])
+{
+    // tokenize user input
+    char* token;
+    token = strtok(cbuf, " ");
+
+    // add each token to arguments
+    int i = 0;
+    while (token != NULL)
+    {
+      // printf("tokenizer:%s\n", token);
+      args[i] = token;
+      token = strtok(NULL, " ");
+      ++i;
+    }
+    args[i] = NULL;
+}
+
+// tokenizes the original command list
+void tokenizeFull(char* command, char* args[])
+{
+  if (strstr(command, "&") == NULL)
+  {
+    args[0] = command;
+    return;
+  }
+  char* token;
+  token = strtok(command, "&");
+
+  // add each token to arguments
+  int i = 0;
+  while (token != NULL)
+  {
+    // printf("tokenizer full: %s\n", token);
+    args[i] = token;
+    token = strtok(NULL, "&");
+    ++i;
+  }
+  args[i] = NULL;
+}
 
 int main(void)
 {
