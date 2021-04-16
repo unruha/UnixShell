@@ -11,7 +11,7 @@ void tokenize(char* cbuf, char* args[])
     int i = 0;
     while (token != NULL)
     {
-        printf("tokenizer:%s\n", token);
+      // printf("tokenizer:%s\n", token);
       args[i] = token;
       token = strtok(NULL, " ");
       ++i;
@@ -34,7 +34,7 @@ void tokenizeFull(char* command, char* args[])
   int i = 0;
   while (token != NULL)
   {
-    printf("tokenizer full: %s\n", token);
+    // printf("tokenizer full: %s\n", token);
     args[i] = token;
     token = strtok(NULL, "&");
     ++i;

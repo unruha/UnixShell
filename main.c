@@ -24,6 +24,15 @@ int main(void)
     fgets(cbuf, MAX_LINE/2 + 1, stdin);
     cbuf[strlen(cbuf) - 1] = '\0';
 
+    // scan for '&'
+    char* shouldWait = strstr(cbuf, "&");
+    char* colon;
+    colon = strstr(cbuf, ";");
+    if (colon != NULL)
+    {
+      strncpy(colon, "", 1);
+    }
+
     // history feature loads previous command
     if (cbuf[0] == '!' && cbuf[1] == '!')
     {
@@ -70,19 +79,19 @@ int main(void)
 
         while (flags[x] != NULL)
         {
-            printf("X is no %d\n", x);
-            printf("Checking args:%s\n", flags[x]);
+            // printf("X is no %d\n", x);
+            // printf("Checking args:%s\n", flags[x]);
 
           if (strcmp(">", flags[x]) == 0)
           {
-            printf("Found > at %d\n", x);
+            // printf("Found > at %d\n", x);
             outputLocation = x;
             // args[x] = '\0'; 
           }
           
           if (strcmp("<", flags[x]) == 0)
           {
-              printf("Found < at %d\n", x);
+            // printf("Found < at %d\n", x);
             inputLocation = x;
             
           }
@@ -93,7 +102,7 @@ int main(void)
 
         if (outputLocation != -1)
         {
-            printf("outputlocation: %s\n", flags[outputLocation + 1]);
+          // printf("outputlocation: %s\n", flags[outputLocation + 1]);
           int file_desc1 = creat(flags[outputLocation + 1], 0640);
           flags[outputLocation] = NULL;       
           close(1);
@@ -104,7 +113,7 @@ int main(void)
 
         if (inputLocation != -1)
         {
-            printf("inputlocation: %s\n", flags[inputLocation + 1]);
+          // printf("inputlocation: %s\n", flags[inputLocation + 1]);
           int file_desc2 = open(flags[inputLocation + 1], O_RDWR);
           flags[inputLocation] = NULL;
           close(0);
@@ -119,7 +128,11 @@ int main(void)
       // in parent process
       else
       {
-        wait(NULL);
+        if (shouldWait == NULL)
+        {
+          wait(NULL);
+        }
+        
         y++;
       }
       
