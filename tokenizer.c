@@ -36,7 +36,7 @@ void tokenizeFull(char* command, char* args[])
   {
     printf("tokenizer full: %s\n", token);
     args[i] = token;
-    token = strtok(NULL, " ");
+    token = strtok(NULL, "&");
     ++i;
   }
   args[i] = NULL;

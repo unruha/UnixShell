@@ -4,6 +4,10 @@ int main(void)
 {
   char** args = malloc((MAX_LINE/2 + 1)* sizeof *args); /* command line arguments */
   int should_run = 1; /* flag to determine when to exit program */
+  
+  // read user input and put in char array
+  char* cbuf = malloc(sizeof(char) * 128);
+  char** flags = malloc((MAX_LINE/2 + 1)* sizeof *flags);
 
   // previous run command
   char previous[MAX_LINE/2 + 1];
@@ -13,11 +17,9 @@ int main(void)
     printf("osh>");
     fflush(stdout);
 
-    // read user input and put in char array
-    char* cbuf = malloc(sizeof(char) * 128);
-
-    // clear cbuf
+    // clear cbuf and args
     memset(cbuf, '\0', sizeof(cbuf));
+    memset(args, '\0', sizeof(args));
 
     fgets(cbuf, MAX_LINE/2 + 1, stdin);
     cbuf[strlen(cbuf) - 1] = '\0';
@@ -45,7 +47,8 @@ int main(void)
     while (args[y] != NULL)
     {
 
-      char** flags = malloc((MAX_LINE/2 + 1)* sizeof *flags);
+
+      memset(flags, '\0', sizeof(flags));
 
       // tokenize user input
       tokenize(args[y], flags);
