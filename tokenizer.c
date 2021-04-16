@@ -1,7 +1,7 @@
 #include "tokenizer.h"
 
-// tokenize user input into individual arguments
-void tokenize(char* cbuf[], char* args[])
+// tokenizes an individual command
+void tokenize(char* cbuf, char* args[])
 {
     // tokenize user input
     char* token;
@@ -17,4 +17,27 @@ void tokenize(char* cbuf[], char* args[])
       ++i;
     }
     args[i] = NULL;
+}
+
+// tokenizes the original command list
+void tokenizeFull(char* command, char* args[])
+{
+  if (strstr(command, "&") == NULL)
+  {
+    args[0] = command;
+    return;
+  }
+  char* token;
+  token = strtok(command, "&");
+
+  // add each token to arguments
+  int i = 0;
+  while (token != NULL)
+  {
+    printf("tokenizer full: %s\n", token);
+    args[i] = token;
+    token = strtok(NULL, " ");
+    ++i;
+  }
+  args[i] = NULL;
 }

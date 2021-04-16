@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
 #include "tokenizer.h"
-
-#define MAX_LINE 80 /* The maximum length command */
 
 int main(void)
 {
@@ -21,7 +14,7 @@ int main(void)
     fflush(stdout);
 
     // read user input and put in char array
-    char cbuf[MAX_LINE/2 + 1];
+    char* cbuf = malloc(sizeof(char) * 128);
 
     // clear cbuf
     memset(cbuf, '\0', sizeof(cbuf));
@@ -46,74 +39,87 @@ int main(void)
     }
 
     // tokenize user input
-    tokenize(cbuf, args);
-    // fork new process
-    int pid = fork();
+    tokenizeFull(cbuf, args);
 
-    // fork failed
-    if (pid < 0)
+    int y = 0;
+    while (args[y] != NULL)
     {
-      printf("Error: failed to fork!");
-    }
-    // in child process
-    else if (pid == 0)
-    {
-      // check for '>' output redirection
-      int x = 0;
-      int inputLocation = -1;
-      int outputLocation = -1;
 
-      while (args[x] != NULL)
+      char** flags = malloc((MAX_LINE/2 + 1)* sizeof *flags);
+
+      // tokenize user input
+      tokenize(args[y], flags);
+      // fork new process
+      int pid = fork();
+
+      // fork failed
+      if (pid < 0)
       {
-          printf("X is no %d\n", x);
-          printf("Checking args:%s\n", args[x]);
+        printf("Error: failed to fork!");
+      }
+      // in child process
+      else if (pid == 0)
+      {
+        // check for '>' output redirection
+        int x = 0;
+        int inputLocation = -1;
+        int outputLocation = -1;
 
-        if (strcmp(">", args[x]) == 0)
+        while (flags[x] != NULL)
         {
+            printf("X is no %d\n", x);
+            printf("Checking args:%s\n", flags[x]);
+
+          if (strcmp(">", flags[x]) == 0)
+          {
             printf("Found > at %d\n", x);
-          outputLocation = x;
-          // args[x] = '\0'; 
-        }
-        
-        if (strcmp("<", args[x]) == 0)
-        {
-            printf("Found < at %d\n", x);
-          inputLocation = x;
+            outputLocation = x;
+            // args[x] = '\0'; 
+          }
+          
+          if (strcmp("<", flags[x]) == 0)
+          {
+              printf("Found < at %d\n", x);
+            inputLocation = x;
+            
+          }
+
+          x++;
           
         }
 
-        x++;
-        
-      }
+        if (outputLocation != -1)
+        {
+            printf("outputlocation: %s\n", flags[outputLocation + 1]);
+          int file_desc1 = creat(flags[outputLocation + 1], 0640);
+          flags[outputLocation] = NULL;       
+          close(1);
+          // 1 is stdout
+          dup(file_desc1);
+          close(file_desc1);
+        }
 
-      if (outputLocation != -1)
+        if (inputLocation != -1)
+        {
+            printf("inputlocation: %s\n", flags[inputLocation + 1]);
+          int file_desc2 = open(flags[inputLocation + 1], O_RDWR);
+          flags[inputLocation] = NULL;
+          close(0);
+          dup(file_desc2);
+          close(file_desc2);
+        }
+
+        // execute the command
+        execvp(flags[0], flags);
+        exit(0);
+      }
+      // in parent process
+      else
       {
-          printf("outputlocation: %s\n", args[outputLocation + 1]);
-        int file_desc1 = creat(args[outputLocation + 1], 0640);
-        args[outputLocation] = NULL;       
-        close(1);
-        // 1 is stdout
-        dup(file_desc1);
-        close(file_desc1);
+        wait(NULL);
+        y++;
       }
-
-      if (inputLocation != -1)
-      {
-          printf("inputlocation: %s\n", args[inputLocation + 1]);
-        int file_desc2 = open(args[inputLocation + 1], O_RDWR);
-        args[inputLocation] = NULL;
-        close(0);
-        dup(file_desc2);
-        close(file_desc2);
-      }
-
-      // execute the command
-      execvp(args[0], args);
-    }
-    // in parent process
-    else
-    {
-      wait();
+      
     }
 
     /**
